@@ -2,7 +2,7 @@
 
 public class Match
 {
-    public string GameLink { get; set; }
+    public string MatchLink { get; set; }
     public Team TeamOne { get; set; }
     public Team TeamTwo { get; set; }
     public string Decider { get; set; }

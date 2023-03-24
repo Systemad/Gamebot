@@ -2,12 +2,34 @@
 using System.Text.RegularExpressions;
 using AngleSharp;
 using AngleSharp.Dom;
+using Match = Gamebot.Models.Match;
+using MatchType = Gamebot.Models.MatchType;
 
 namespace Gamebot;
 
-public static class API
+public class API
 {
-    public static async Task<string> GetMapCommand()
+    public async Task<string> SetupMatch(string teamName)
+    {
+        return "";
+    }
+
+    public async Task<Match> FetchMatchInformation(string matchLink)
+    {
+        var match = new Match
+        {
+            MatchLink = null,
+            TeamOne = null,
+            TeamTwo = null,
+            Decider = null,
+            MatchType = MatchType.BO1,
+            Event = null
+        };
+
+        return match;
+    }
+
+    private async Task<string> GetMapCommand()
     {
         StringBuilder finalString = new();
         var config = Configuration.Default.WithDefaultLoader();
@@ -21,7 +43,7 @@ public static class API
         return finalString.ToString();
     }
 
-    private static string GetMapFormat(IParentNode document)
+    private string GetMapFormat(IParentNode document)
     {
         // BO1 or BO3 format
         string preformattedText = document.QuerySelector(".preformatted-text").InnerHtml;
@@ -31,7 +53,7 @@ public static class API
         return matchFormat;
     }
 
-    private static string GetMapPickString(IParentNode document)
+    private string GetMapPickString(IParentNode document)
     {
         var mapString = new StringBuilder();
 
@@ -65,7 +87,7 @@ public static class API
         return mapString.ToString();
     }
 
-    private static string GetMapLink(IParentNode document)
+    private string GetMapLink(IParentNode document)
     {
         var matches = document.QuerySelectorAll(".liveMatch-container");
         // Get list of abbreviations for this team
