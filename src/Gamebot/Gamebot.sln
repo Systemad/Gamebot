@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gamebot", "Gamebot.csproj", "{66C2012F-4A84-4FA3-8270-3C7CC2743AE0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{66C2012F-4A84-4FA3-8270-3C7CC2743AE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66C2012F-4A84-4FA3-8270-3C7CC2743AE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66C2012F-4A84-4FA3-8270-3C7CC2743AE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66C2012F-4A84-4FA3-8270-3C7CC2743AE0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
