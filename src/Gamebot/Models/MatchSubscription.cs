@@ -5,6 +5,6 @@
 
 public class MatchSubscription
 {
+    public string Channel { get; set; }
     public Match Match { get; set; }
-    public bool GameOver { get; set; }
 }

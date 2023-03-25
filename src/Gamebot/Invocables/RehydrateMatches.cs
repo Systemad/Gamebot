@@ -24,10 +24,11 @@ public class RehydrateMatches : IInvocable, ICancellableInvocable
         {
             var updatedMatch = await Api.FetchMatchInformation(match.Match.MatchLink);
             var dbMatch = await _dbContext.ActiveMatches.FirstOrDefaultAsync(
-                m => m.Match.MatchLink == match.Match.MatchLink
+                m => m.Match.MatchLink == match.Match.MatchLink,
+                cancellationToken: CancellationToken
             );
             dbMatch.Match = updatedMatch;
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(CancellationToken);
         }
     }
 }

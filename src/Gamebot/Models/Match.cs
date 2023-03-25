@@ -8,6 +8,7 @@ public class Match
     public string Decider { get; set; }
     public MatchType MatchType { get; set; }
     public Event Event { get; set; }
+    public bool GameOver { get; set; }
 }
 
 public class Team

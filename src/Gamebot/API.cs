@@ -2,6 +2,8 @@
 using System.Text.RegularExpressions;
 using AngleSharp;
 using AngleSharp.Dom;
+using Gamebot.Models;
+using Gamebot.Persistence;
 using Match = Gamebot.Models.Match;
 using MatchType = Gamebot.Models.MatchType;
 
@@ -9,21 +11,26 @@ namespace Gamebot;
 
 public class API
 {
-    public async Task<string> SetupMatch(string teamName)
+    public async Task SetupMatch(string teamName)
     {
-        return "";
+        var dbContext = new GameContext();
+        var link = GetMapPickString()
     }
 
     public async Task<Match> FetchMatchInformation(string matchLink)
     {
+        var config = Configuration.Default.WithDefaultLoader();
+        var context = BrowsingContext.New(config);
+        IDocument document = await context.OpenAsync(req => req.Content("text"));
+        var mapFormat = GetMatchFormat(document);
         var match = new Match
         {
             MatchLink = null,
             TeamOne = null,
             TeamTwo = null,
             Decider = null,
-            MatchType = MatchType.BO1,
-            Event = null
+            MatchType = GetMatchFormat(document),
+            Event = GetEvent(document)
         };
 
         return match;
@@ -36,21 +43,32 @@ public class API
         var context = BrowsingContext.New(config);
         var text = File.ReadAllText("/navi-spirit.htm");
         IDocument document = await context.OpenAsync(req => req.Content(text));
-        var mapFormat = GetMapFormat(document);
+        var mapFormat = GetMatchFormat(document);
         finalString.Append(mapFormat + ": ");
         var mapPicks = GetMapPickString(document);
         finalString.Append(mapPicks);
         return finalString.ToString();
     }
 
-    private string GetMapFormat(IParentNode document)
+    private MatchType GetMatchFormat(IParentNode document)
     {
-        // BO1 or BO3 format
         string preformattedText = document.QuerySelector(".preformatted-text").InnerHtml;
         var matchFormat = preformattedText
             .Split('\n', StringSplitOptions.RemoveEmptyEntries)
             .First();
-        return matchFormat;
+        return matchFormat.Contains("Best of 3") ? MatchType.BO3 : MatchType.BO3;
+    }
+
+    private Event GetEvent(IParentNode document)
+    {
+
+        string preformattedText = document.QuerySelector(".preformatted-text").InnerHtml;
+        var matchFormat = preformattedText
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .First();
+        // Extract LINK!!        
+        var eventObj = new Event { Name = null, EventType = matchFormat.Contains("LAN") ? EventType.Online : EventType.Offline; };
+        return eventObj;
     }
 
     private string GetMapPickString(IParentNode document)
@@ -75,6 +93,7 @@ public class API
             if (map.Contains("picked"))
             {
                 var splits = Regex.Replace(map.Trim(), @"^\d.", " ").Trim().Split(" picked ");
+
                 var picks = $"{splits[1]} ({splits[0]})";
                 mapString.Append(picks);
                 mapString.Append(" - ");
