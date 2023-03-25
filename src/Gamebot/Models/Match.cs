@@ -1,14 +1,16 @@
 ﻿namespace Gamebot.Models;
 
-public class Match
+public partial class Match
 {
-    public string MatchLink { get; set; }
+    public string MatchLink { get; set; } = null!;
     public Team TeamOne { get; set; }
     public Team TeamTwo { get; set; }
     public string Decider { get; set; }
     public MatchType MatchType { get; set; }
     public Event Event { get; set; }
     public bool GameOver { get; set; }
+    public virtual ICollection<MatchSubscription> MatchSubs { get; } =
+        new List<MatchSubscription>();
 }
 
 public class Team

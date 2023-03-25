@@ -87,8 +87,8 @@ public class TwitchClientWorkerService : IHostedService
                  *  > return match
                  * }
                 */
-                var cmdString = CommandHelper.GetCommandString(match.Match);
-                _twitchClient.SendMessage(e.ChatMessage.Channel, cmdString);
+                //var cmdString = CommandHelper.GetCommandString(match.Match);
+                _twitchClient.SendMessage(e.ChatMessage.Channel, "cmdString");
             }
         }
     }

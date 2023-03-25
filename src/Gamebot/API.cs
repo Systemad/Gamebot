@@ -14,7 +14,7 @@ public class API
     public async Task SetupMatch(string teamName)
     {
         var dbContext = new GameContext();
-        var link = GetMapPickString()
+        //var link = GetMapPickString()
     }
 
     public async Task<Match> FetchMatchInformation(string matchLink)
@@ -61,13 +61,16 @@ public class API
 
     private Event GetEvent(IParentNode document)
     {
-
         string preformattedText = document.QuerySelector(".preformatted-text").InnerHtml;
         var matchFormat = preformattedText
             .Split('\n', StringSplitOptions.RemoveEmptyEntries)
             .First();
-        // Extract LINK!!        
-        var eventObj = new Event { Name = null, EventType = matchFormat.Contains("LAN") ? EventType.Online : EventType.Offline; };
+        // Extract LINK!!
+        var eventObj = new Event
+        {
+            Name = null,
+            EventType = matchFormat.Contains("LAN") ? EventType.Online : EventType.Offline
+        };
         return eventObj;
     }
 

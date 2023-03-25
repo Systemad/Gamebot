@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Gamebot.Persistence;
 
-public class GameContext : DbContext
+public partial class GameContext : DbContext
 {
     public DbSet<MatchSubscription> ActiveMatches { get; set; }
     public DbSet<Match> Matches { get; set; }
@@ -12,22 +12,41 @@ public class GameContext : DbContext
 
     public GameContext()
     {
-        var folder = Environment.SpecialFolder.LocalApplicationData;
-        var path = Environment.GetFolderPath(folder);
-        DbPath = Path.Join(path, "blogging.db");
+        var folder = Directory.GetCurrentDirectory();
+        DbPath = Path.Join(folder + "/Persistence", "testbot");
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder options) =>
-        options.UseSqlite($"Data Source={DbPath}");
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
+        optionsBuilder.UseSqlite("Data Source=Persistence\\testbot");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<MatchSubscription>().HasIndex(m => m.Channel).IsUnique();
-        //        modelBuilder.Entity<MatchSubscription>().HasKey(m => m.Channel);
-        //modelBuilder.Entity<Match>().HasKey(m => m.MatchLink);
-        modelBuilder.Entity<Match>().HasIndex(m => m.MatchLink).IsUnique();
+        modelBuilder.Entity<Match>(
+            entity =>
+            {
+                entity.HasKey(e => e.MatchLink);
 
-        modelBuilder.Entity<MatchSubscription>().HasOne<Match>();
-        base.OnModelCreating(modelBuilder);
+                entity.ToTable("Match");
+            }
+        );
+
+        modelBuilder.Entity<MatchSubscription>(
+            entity =>
+            {
+                entity.HasKey(e => e.Channel);
+
+                entity.ToTable("MatchSub");
+
+                entity
+                    .HasOne(d => d.Match)
+                    .WithMany(p => p.MatchSubs)
+                    .HasForeignKey(d => d.MatchId)
+                    .OnDelete(DeleteBehavior.ClientSetNull);
+            }
+        );
+
+        OnModelCreatingPartial(modelBuilder);
     }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

@@ -1,10 +1,10 @@
 ﻿namespace Gamebot.Models;
 
-// When fetching a game info from a match link
-// save the file to team1-team2-date.htm as have that file as key
-
-public class MatchSubscription
+public partial class MatchSubscription
 {
-    public string Channel { get; set; }
-    public Match Match { get; set; }
+    public string Channel { get; set; } = null!;
+
+    public string MatchId { get; set; } = null!;
+
+    public virtual Match Match { get; set; } = null!;
 }
