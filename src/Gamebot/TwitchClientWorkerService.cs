@@ -1,9 +1,9 @@
-﻿using Gamebot.Helper;
-using Gamebot.Persistence;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Concurrent;
+using Gamebot.Helper;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TwitchLib.Client;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace Gamebot;
 
@@ -11,16 +11,19 @@ public class TwitchClientWorkerService : IHostedService
 {
     private readonly ILogger _logger;
     private readonly TwitchClient _twitchClient;
-    private readonly GameContext _gameContext;
+    private readonly API _api;
+
+    private ConcurrentDictionary<string, string> CacheKeys { get; set; }
 
     public TwitchClientWorkerService(
         ILogger<TwitchClientWorkerService> logger,
         IHostApplicationLifetime appLifetime,
-        GameContext gameContext
+        API api
     )
     {
         _logger = logger;
-        _gameContext = gameContext;
+        _api = api;
+        CacheKeys = new();
         _twitchClient = Bot.CreateTwitchClient();
         appLifetime.ApplicationStarted.Register(OnStarted);
         //appLifetime.ApplicationStopping.Register(OnStopping);
@@ -30,7 +33,7 @@ public class TwitchClientWorkerService : IHostedService
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("1. StartAsync has been called.");
-        _twitchClient.OnMessageReceived += async (s, e) => await OnMessageReceived(s, e);
+        _twitchClient.OnChatCommandReceived += async (s, e) => await OnChatCommandReceived(s, e);
         _twitchClient.Connect();
         return Task.CompletedTask;
     }
@@ -57,39 +60,40 @@ public class TwitchClientWorkerService : IHostedService
         _logger.LogInformation("5. OnStopped has been called.");
     }
 
-    private async Task OnMessageReceived(
+    private async Task OnChatCommandReceived(
         object sender,
-        TwitchLib.Client.Events.OnMessageReceivedArgs e
+        TwitchLib.Client.Events.OnChatCommandReceivedArgs e
     )
     {
-        if (e.ChatMessage.Message.StartsWith("!match"))
+        if (e.Command.CommandText.Equals("match"))
         {
-            //if (!string.IsNullOrWhiteSpace(e.ChatMessage.Message))
-            //{
-            var match = await _gameContext.ActiveMatches.FirstOrDefaultAsync(
-                m => m.Channel == e.ChatMessage.Channel
-            );
-            var cmdString = CommandHelper.GetCommandString(match.Match);
-            _twitchClient.SendMessage(e.ChatMessage.Channel, cmdString);
-            //}
+            if (CacheKeys.TryGetValue(e.Command.ChatMessage.Channel, out string cachekey))
+            {
+                var match = await _api.GetMatch(cachekey);
+                var matchString = CommandHelper.GetCommandString(match);
+                _twitchClient.SendMessage(e.Command.ChatMessage.Channel, matchString);
+            }
         }
 
-        if (e.ChatMessage.Message.StartsWith("!setgame"))
+        if (e.Command.CommandText.Equals("setmatch"))
         {
-            if (!string.IsNullOrWhiteSpace(e.ChatMessage.Message))
+            if (!string.IsNullOrWhiteSpace(e.Command.CommandText))
             {
-                // var hey = await setupgame(streamer, team); return match obj
-                /*
-                 * setupgame(){
-                 *  > Get match link
-                 *  > Check if match id exist, return
-                 *  > or setup match, with help of link
-                 *  > return match
-                 * }
-                */
-                //var cmdString = CommandHelper.GetCommandString(match.Match);
-                _twitchClient.SendMessage(e.ChatMessage.Channel, "cmdString");
+                var matchLink = await _api.GetMatchLink(e.Command.ArgumentsAsList[1]);
+
+                if (CacheKeys.TryAdd(e.Command.ChatMessage.Channel, matchLink))
+                {
+                    var match = await _api.GetMatch(matchLink);
+                    var matchString = CommandHelper.GetCommandString(match);
+                    _twitchClient.SendMessage(e.Command.ChatMessage.Channel, matchString);
+                }
             }
         }
     }
 }
+
+/*
+    ChannelB wants C9 vs FaZe
+    
+
+*/

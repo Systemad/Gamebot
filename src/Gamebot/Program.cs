@@ -1,6 +1,5 @@
 ﻿using Coravel;
 using Gamebot;
-using Gamebot.Invocables;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,17 +28,25 @@ var host = Host.CreateDefaultBuilder(args)
         (services) =>
         {
             services.AddHostedService<TwitchClientWorkerService>();
-            services.AddScheduler();
-            services.AddTransient<RehydrateMatches>();
+            //services.AddScheduler();
+            //services.AddTransient<RehydrateMatches>();
+            services.AddFusionCache();
+            services.AddHttpClient<API>(
+                client =>
+                {
+                    client.BaseAddress = new Uri("https://www.hltv.org/");
+                }
+            );
         }
     )
     .Build();
 
+/*
 host.Services.UseScheduler(
     scheduler =>
     {
         scheduler.Schedule<RehydrateMatches>().EveryFifteenMinutes().RunOnceAtStart();
     }
 );
-
+*/
 await host.RunAsync();

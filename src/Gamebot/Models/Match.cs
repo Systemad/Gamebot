@@ -8,9 +8,8 @@ public partial class Match
     public string Decider { get; set; }
     public MatchType MatchType { get; set; }
     public Event Event { get; set; }
-    public bool GameOver { get; set; }
-    public virtual ICollection<MatchSubscription> MatchSubs { get; } =
-        new List<MatchSubscription>();
+    //public virtual ICollection<MatchSubscription> MatchSubs { get; } =
+    //    new List<MatchSubscription>();
 }
 
 public class Team
