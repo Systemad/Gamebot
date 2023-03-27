@@ -10,19 +10,16 @@ public static class Bot
 {
     public static TwitchClient CreateTwitchClient()
     {
-        TwitchClient client = new();
-        ConnectionCredentials credentials = new ConnectionCredentials("LossyXP", "access_token");
+        ConnectionCredentials credentials = new ConnectionCredentials("", "");
         var clientOptions = new ClientOptions
         {
-            ClientType = ClientType.Chat,
-            //MessagesAllowedInPeriod = 750,
-            //ThrottlingPeriod = TimeSpan.FromSeconds(30)
+            //ClientType = ClientType.Chat,
+            MessagesAllowedInPeriod = 750,
+            ThrottlingPeriod = TimeSpan.FromSeconds(30)
         };
         WebSocketClient customClient = new WebSocketClient(clientOptions);
-        client = new TwitchClient(customClient);
-        client.Initialize(credentials, "channel");
-
-        //client.OnMessageReceived += OnMessageReceived;
+        TwitchClient client = new TwitchClient(customClient);
+        client.Initialize(credentials, "LossyXP");
         return client;
     }
 }

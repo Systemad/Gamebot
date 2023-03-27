@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using Serilog.Events;
 
 IConfiguration config = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
@@ -11,34 +12,25 @@ IConfiguration config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-var outputTemplate = "[{Timestamp:HH:mm:ss} {Level}] {Message}{NewLine}{Exception}";
-
-ILogger logger = new LoggerConfiguration().Enrich
-    .FromLogContext()
-    .WriteTo.Console(outputTemplate: outputTemplate)
-    .WriteTo.File(
-        "log/log_.txt",
-        outputTemplate: outputTemplate,
-        rollingInterval: RollingInterval.Day
-    )
+Log.Logger = new LoggerConfiguration().MinimumLevel
+    .Debug()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("log/log_.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(
         (services) =>
         {
-            services.AddHostedService<TwitchClientWorkerService>();
+            services.AddFusionCache();
+            services.AddHostedService<TwitchClientWorkerService>().AddSingleton<API>();
             //services.AddScheduler();
             //services.AddTransient<RehydrateMatches>();
-            services.AddFusionCache();
-            services.AddHttpClient<API>(
-                client =>
-                {
-                    client.BaseAddress = new Uri("https://www.hltv.org/");
-                }
-            );
         }
     )
+    .UseSerilog()
     .Build();
 
 /*

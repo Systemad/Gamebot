@@ -16,8 +16,10 @@ public class API
 
     public async Task<string> GetMatchLink(string shortenedTeamName)
     {
-        // TODO: Return if doesn't exist, then says "insert full name"
         var actualTeamName = TeamsHelper.GetFullNameFromTeamCode(shortenedTeamName);
+        if (string.IsNullOrEmpty(actualTeamName))
+            return string.Empty;
+
         var parser = new ContentParser();
 
         var allMatches = await _fusionCache.GetOrSetAsync<IDocument>(
@@ -31,6 +33,9 @@ public class API
             _ => parser.GetMatchLink(allMatches, actualTeamName),
             options => options.SetDuration(TimeSpan.FromHours(3))
         );
+
+        if (string.IsNullOrEmpty(matchCacheKey))
+            return string.Empty;
 
         return matchCacheKey;
     }

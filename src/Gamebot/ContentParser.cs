@@ -110,7 +110,8 @@ public class ContentParser
             var team1 = matchteams[0].QuerySelector(".matchTeamName").InnerHtml;
             var team2 = matchteams[1].QuerySelector(".matchTeamName").InnerHtml;
 
-            var contains = team1.Equals(team) || team2.Equals(team);
+            var comparer = StringComparison.CurrentCultureIgnoreCase;
+            var contains = team1.Equals(team, comparer) || team2.Equals(team, comparer);
             if (contains)
             {
                 var livematchlink = match.QuerySelector(".liveMatch").QuerySelector("a").Attributes[
@@ -120,7 +121,7 @@ public class ContentParser
             }
         }
 
-        return Task.FromResult<string>(null);
+        return Task.FromResult(string.Empty);
     }
 
     public async Task<IDocument> DownloadMatches()

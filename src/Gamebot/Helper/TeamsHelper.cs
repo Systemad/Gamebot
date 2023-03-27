@@ -135,17 +135,15 @@ public static class TeamsHelper
     {
         string fullname = string.Empty;
 
-        if (_teamAbbreviations.ContainsKey(name))
-        {
-            fullname = _teamAbbreviations.FirstOrDefault(n => n.Key == name).Key;
-        }
+        var comparer = StringComparison.CurrentCultureIgnoreCase;
 
-        string fullName = _teamAbbreviations.FirstOrDefault(x => x.Value.Contains(name)).Key;
-        if (fullName is not null)
-        {
-            fullname = fullName;
-        }
+        if (_teamAbbreviations.TryGetValue(name, out var nameKey))
+            return _teamAbbreviations.Keys.FirstOrDefault(key => key.Equals(name, comparer));
 
+        string fullName = _teamAbbreviations
+            .FirstOrDefault(x => x.Value.Contains(name, StringComparer.InvariantCulture))
+            .Key;
+        fullname = fullName;
         return fullname;
     }
 }
