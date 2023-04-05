@@ -1,0 +1,50 @@
+﻿@page "/"
+
+@using TwitchLib.Api
+@using TwitchLib.Api.Helix.Models.Users.GetUsers
+@using System.Net
+@using Gamebot.Helper
+@inject NavigationManager NavigationManager;
+
+<PageTitle>Index</PageTitle>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Add bot to channel!</button>
+
+<p>@_user.DisplayName</p>
+<p>@_user.Id</p>
+
+
+@code {
+    TwitchAPI api;
+    HttpListener listener;
+    User _user = new();
+    string _authUrl = string.Empty;
+    private bool isProcessing = false;
+    TwitchOptions _options = new();
+    
+    protected override void OnInitialized()
+    {
+        var config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables()
+            .Build();
+
+        //var options = new TwitchOptions();
+        config.GetSection(TwitchOptions.Twitch).Bind(_options);
+        
+        api = new TwitchAPI { Settings = { ClientId = _options.ClientId } };
+        listener = new();
+        listener.Prefixes.Add(_options.RedirectUri);
+    }
+
+    private void IncrementCount()
+    {
+        var authUrl = Helpers.GetAuthorizationCodeUrl(
+            _options.ClientId,
+            _options.RedirectUri,
+            Helpers.GetScopes()
+            );
+        NavigationManager.NavigateTo(authUrl);
+    }
+}

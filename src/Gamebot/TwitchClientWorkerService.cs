@@ -1,11 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using Gamebot.Helper;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
-using ZiggyCreatures.Caching.Fusion;
 
 namespace Gamebot;
 
@@ -30,6 +28,7 @@ public class TwitchClientWorkerService : IHostedService
         _twitchClient = Bot.CreateTwitchClient();
         Log.Information("Starting - Twitchbot status {@Status}", _twitchClient.IsConnected);
         _twitchClient.OnChatCommandReceived += async (s, e) => await OnChatCommandReceived(s, e);
+        //_twitchClient.OnMessageReceived += OnMessageReceived;
         _twitchClient.OnConnected += Client_OnConnected;
         _twitchClient.Connect();
 
@@ -50,12 +49,24 @@ public class TwitchClientWorkerService : IHostedService
 
     private void OnStopped() => Log.Information("5. OnStopped has been called.");
 
+    private void OnMessageReceived(object sender, OnMessageReceivedArgs e) =>
+        Log.Information(e.ChatMessage.Message);
+
     private async Task OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
     {
+        Log.Information(e.Command.ChatMessage.Message);
+
+        // TODO: FIX
+        if (!e.Command.ChatMessage.IsBroadcaster || !e.Command.ChatMessage.IsModerator)
+            return;
+
+        Log.Information("after ismod isbroadcaster");
+
         if (e.Command.CommandIdentifier is not '!')
             return;
 
-        Log.Information(e.Command.ChatMessage.Message);
+        Log.Information("commandidentifier: ");
+
         if (e.Command.CommandText.Equals("match"))
         {
             if (CacheKeys.TryGetValue(e.Command.ChatMessage.Channel, out string cachekey))

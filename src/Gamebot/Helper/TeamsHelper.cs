@@ -140,10 +140,13 @@ public static class TeamsHelper
         if (_teamAbbreviations.TryGetValue(name, out var nameKey))
             return _teamAbbreviations.Keys.FirstOrDefault(key => key.Equals(name, comparer));
 
-        string fullName = _teamAbbreviations
-            .FirstOrDefault(x => x.Value.Contains(name, StringComparer.InvariantCulture))
+        var fullName = _teamAbbreviations
+            .FirstOrDefault(x => x.Value.Contains(name, StringComparer.InvariantCultureIgnoreCase))
             .Key;
-        fullname = fullName;
+
+        //if (!string.IsNullOrEmpty(fullName))
+        //    return fullName;
+
         return fullname;
     }
 }

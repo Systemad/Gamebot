@@ -1,4 +1,5 @@
-﻿using TwitchLib.Client;
+﻿using Microsoft.Extensions.Configuration;
+using TwitchLib.Client;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Enums;
@@ -10,7 +11,19 @@ public static class Bot
 {
     public static TwitchClient CreateTwitchClient()
     {
-        ConnectionCredentials credentials = new ConnectionCredentials("", "");
+        IConfiguration config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables()
+            .Build();
+
+        var options = new TwitchOptions();
+        config.GetSection(TwitchOptions.Twitch).Bind(options);
+
+        ConnectionCredentials credentials = new ConnectionCredentials(
+            options.Username,
+            options.AccessToken
+        );
         var clientOptions = new ClientOptions
         {
             //ClientType = ClientType.Chat,
