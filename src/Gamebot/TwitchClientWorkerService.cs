@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Gamebot.Helper;
+using Gamebot.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using TwitchLib.Client;
@@ -23,7 +25,7 @@ public class TwitchClientWorkerService : IHostedService
         //appLifetime.ApplicationStopped.Register(OnStopped);
     }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         _twitchClient = Bot.CreateTwitchClient();
         Log.Information("Starting - Twitchbot status {@Status}", _twitchClient.IsConnected);
@@ -31,8 +33,7 @@ public class TwitchClientWorkerService : IHostedService
         //_twitchClient.OnMessageReceived += OnMessageReceived;
         _twitchClient.OnConnected += Client_OnConnected;
         _twitchClient.Connect();
-
-        return Task.CompletedTask;
+        await JoinConnectedChannels();
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
@@ -101,4 +102,15 @@ public class TwitchClientWorkerService : IHostedService
 
     private void Client_OnConnected(object sender, OnConnectedArgs e) =>
         Log.Information($"Connected to {e.BotUsername}");
+
+    private async Task JoinConnectedChannels()
+    {
+        var dbContext = new BotDbContext();
+        var channels = await dbContext.Channels.ToListAsync();
+
+        foreach (var channel in channels)
+        {
+            _twitchClient.JoinChannel(channel.Name);
+        }
+    }
 }
