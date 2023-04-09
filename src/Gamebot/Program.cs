@@ -15,11 +15,10 @@ Log.Logger = new LoggerConfiguration().MinimumLevel
 
 var builder = WebApplication.CreateBuilder(args);
 
-// builder.Services.AddSingleton<ChannelService>();
 builder.Services.AddFusionCache();
+builder.Services.AddSingleton<TwitchBotClient>();
 builder.Services.AddHostedService<TwitchClientWorkerService>().AddSingleton<API>();
 
-// TODO: Wait for this https://github.com/serilog/serilog-extensions-hosting/pull/70
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -48,10 +47,9 @@ IConfiguration config = new ConfigurationBuilder()
 var options = new TwitchOptions();
 config.GetSection(TwitchOptions.Twitch).Bind(options);
 
-// Figure out join channel directly from here! global TwitchClient or eventhandler something
 app.MapGet(
     "/redirect/",
-    async (HttpRequest request, BotDbContext dbContext) =>
+    async (HttpRequest request, TwitchBotClient twitchBotClient) =>
     {
         var queryString = request.QueryString;
         var queryDictionary = QueryHelpers.ParseQuery(queryString.Value);
@@ -79,10 +77,10 @@ app.MapGet(
                 Name = user.Users.First().Login,
                 Added = DateTimeOffset.Now
             };
-            dbContext.Channels.Add(channel);
-            await dbContext.SaveChangesAsync();
+            await twitchBotClient.JoinChannelAsync(channel);
         }
         context.Response.Redirect("/");
     }
 );
+
 await app.RunAsync();

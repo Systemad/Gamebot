@@ -8,17 +8,10 @@
 
 <PageTitle>Index</PageTitle>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Add bot to channel!</button>
-
-<p>@_user.DisplayName</p>
-<p>@_user.Id</p>
-
+<button class="btn btn-primary" @onclick="NavigateToAuthorization">Add bot to channel!</button>
 
 @code {
     TwitchAPI api;
-    HttpListener listener;
-    User _user = new();
-    string _authUrl = string.Empty;
     private bool isProcessing = false;
     TwitchOptions _options = new();
     
@@ -30,15 +23,11 @@
             .AddEnvironmentVariables()
             .Build();
 
-        //var options = new TwitchOptions();
         config.GetSection(TwitchOptions.Twitch).Bind(_options);
-        
         api = new TwitchAPI { Settings = { ClientId = _options.ClientId } };
-        listener = new();
-        listener.Prefixes.Add(_options.RedirectUri);
     }
 
-    private void IncrementCount()
+    private void NavigateToAuthorization()
     {
         var authUrl = Helpers.GetAuthorizationCodeUrl(
             _options.ClientId,
