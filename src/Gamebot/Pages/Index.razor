@@ -1,39 +1,40 @@
 ﻿@page "/"
 
-@using TwitchLib.Api
-@using TwitchLib.Api.Helix.Models.Users.GetUsers
-@using System.Net
 @using Gamebot.Helper
 @inject NavigationManager NavigationManager;
 
 <PageTitle>Index</PageTitle>
 
-<button class="btn btn-primary" @onclick="NavigateToAuthorization">Add bot to channel!</button>
-
-@code {
-    TwitchAPI api;
-    private bool isProcessing = false;
-    TwitchOptions _options = new();
-    
-    protected override void OnInitialized()
-    {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .AddEnvironmentVariables()
-            .Build();
-
-        config.GetSection(TwitchOptions.Twitch).Bind(_options);
-        api = new TwitchAPI { Settings = { ClientId = _options.ClientId } };
-    }
-
-    private void NavigateToAuthorization()
-    {
-        var authUrl = Helpers.GetAuthorizationCodeUrl(
-            _options.ClientId,
-            _options.RedirectUri,
-            Helpers.GetScopes()
-            );
-        NavigationManager.NavigateTo(authUrl);
-    }
-}
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+    <MudPaper Elevation="0" Height="400px" Width="100%" Square="true" Class="pa-8">
+        <MudText Typo="Typo.body1">
+        This is a very simple CSGO Game bot, which is primarily used for streamers who are co-streaming CS:GO matches.
+        </MudText>
+        <br/>
+        <MudDivider Class="mt-4 mb-4" />
+        <MudText Typo="Typo.h6" Align="Align.Center">
+            How to use
+        </MudText>
+        <br />
+        <MudText Typo="Typo.body1">
+                    !setmatch team / abbreviation e.g natus vincere, g2, vitality
+                    <br />
+                    !match - will return match information - Maps: Ancient (G2) - Inferno (NaVi) - Mirage (Decider)
+                    <br/>
+                    !matchlink - will return current matchlink
+                    <br/>
+                    !forcerefresh - forces bot to refresh cache
+                    <br/>
+                    !unsetmatch - removes current match
+        </MudText>
+       
+    </MudPaper>
+    <MudPaper Elevation="0" Height="150px" Width="100%" Square="true"
+              Class="mt-8 d-flex align-content-center justify-center flex-wrap flex-grow-1 gap-4">
+        <MudPaper Elevation="0">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="NavigateToAuthorization">
+                Add bot to channel!
+            </MudButton>
+        </MudPaper>
+    </MudPaper>
+</MudContainer>

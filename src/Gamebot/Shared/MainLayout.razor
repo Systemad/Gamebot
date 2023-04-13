@@ -1,19 +1,14 @@
 ﻿@inherits LayoutComponentBase
 
-<PageTitle>twitchtest</PageTitle>
+<PageTitle>Twitch CSGO Game Bot</PageTitle>
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode"/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu/>
-    </div>
+@Body
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+@code {
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+    private bool _isDarkMode = true;
+
+}

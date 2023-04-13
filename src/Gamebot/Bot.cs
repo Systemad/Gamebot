@@ -13,36 +13,41 @@ namespace Gamebot;
 
 public class TwitchBotClient
 {
-    private BotDbContext _dbContext;
+    private readonly IDbContextFactory<BotDbContext> _contextFactory;
     private readonly API _api;
-    private TwitchClient TwitchClient;
+    private readonly TwitchClient TwitchClient;
     private ConcurrentDictionary<string, string> CacheKeys { get; set; }
 
-    public TwitchBotClient(BotDbContext dbContext, API api)
+    public TwitchBotClient(API api, IDbContextFactory<BotDbContext> contextFactory)
     {
         CacheKeys = new();
-        _dbContext = dbContext;
         _api = api;
+        _contextFactory = contextFactory;
         TwitchClient = Bot.CreateTwitchClient();
-        TwitchClient.OnConnected += Client_OnConnected;
         TwitchClient.OnConnected += async (sender, args) => await OnConnectedAsync(sender, args);
     }
 
     public async Task JoinChannelAsync(TwitchChannel channel)
     {
-        _dbContext.Channels.Add(channel);
-        await _dbContext.SaveChangesAsync();
+        await using var context = _contextFactory.CreateDbContext();
+        context.Channels.Add(channel);
+        await context.SaveChangesAsync();
         TwitchClient.JoinChannel(channel.Name);
     }
 
-    public void ConnectBot() => TwitchClient.Connect();
+    public void ConnectBot()
+    {
+        TwitchClient.Connect();
+        Log.Information(BotStatus.ToString());
+    }
 
-    public void DisconnectBot() => TwitchClient.Disconnect();
+    public void DisconnectBot()
+    {
+        TwitchClient.Disconnect();
+        Log.Information(BotStatus.ToString());
+    }
 
     public bool BotStatus => TwitchClient.IsConnected;
-
-    private void Client_OnConnected(object sender, OnConnectedArgs e) =>
-        Log.Information($"Connected to {e.BotUsername}");
 
     private async Task OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
     {
@@ -93,11 +98,13 @@ public class TwitchBotClient
 
     private async Task OnConnectedAsync(object sender, OnConnectedArgs args)
     {
-        var dbContext = new BotDbContext();
-        var channels = await dbContext.Channels.ToListAsync();
+        Log.Information($"OnConnectedAsync: Connected to {args.BotUsername}");
+        await using var context = _contextFactory.CreateDbContext();
+        var channels = await context.Channels.ToListAsync();
 
         foreach (var channel in channels)
         {
+            Log.Information($"Connecting to {channel.Name}");
             TwitchClient.JoinChannel(channel.Name);
         }
     }
