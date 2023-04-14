@@ -83,7 +83,7 @@ app.UseRouting();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
-app.MapGroup("/").MapAuthRedirect();
+//app.MapGroup("/").MapAuthRedirect();
 
 /*
 using (var scope = app.Services.CreateScope())
