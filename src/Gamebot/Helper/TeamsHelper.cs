@@ -10,6 +10,10 @@ public static class TeamsHelper
                 new List<string>() { "NAVI", "Na'Vi" }
             },
             {
+                "Cloud 9",
+                new List<string>() { "C9" }
+            },
+            {
                 "G2 Esports",
                 new List<string>() { "G2" }
             },
@@ -26,7 +30,7 @@ public static class TeamsHelper
                 new List<string>() { "BIG" }
             },
             {
-                "FURIA Esports",
+                "FURIA",
                 new List<string>() { "FURIA" }
             },
             {
@@ -38,10 +42,6 @@ public static class TeamsHelper
                 new List<string>() { "LIQUID", "TL", "TLQ" }
             },
             {
-                "Gambit Esports",
-                new List<string>() { "GAMBIT" }
-            },
-            {
                 "OG",
                 new List<string>() { "OG" }
             },
@@ -51,7 +51,7 @@ public static class TeamsHelper
             },
             {
                 "FaZe Clan",
-                new List<string>() { "FAZE", "FCN" }
+                new List<string>() { "FAZE" }
             },
             {
                 "Ninjas in Pyjamas",
@@ -60,10 +60,6 @@ public static class TeamsHelper
             {
                 "Astralis",
                 new List<string>() { "AST" }
-            },
-            {
-                "mousesports",
-                new List<string>() { "MOUZ", "MOUSE" }
             },
             {
                 "Fnatic",
@@ -82,44 +78,12 @@ public static class TeamsHelper
                 new List<string>() { "FORZE" }
             },
             {
-                "Sinners Esports",
-                new List<string>() { "SINNERS" }
-            },
-            {
-                "Renegades",
-                new List<string>() { "RNG" }
-            },
-            {
-                "Gambit Youngsters",
-                new List<string>() { "GMB.YNG" }
-            },
-            {
-                "SKADE",
-                new List<string>() { "SKADE" }
-            },
-            {
-                "Entropiq",
-                new List<string>() { "ENTROPIQ" }
-            },
-            {
                 "AGO",
                 new List<string>() { "AGO" }
             },
             {
-                "NASR",
-                new List<string>() { "NASR" }
-            },
-            {
-                "Fiend",
-                new List<string>() { "FIEND" }
-            },
-            {
                 "EXTREMUM",
                 new List<string>() { "EXTREMUM" }
-            },
-            {
-                "Dignitas",
-                new List<string>() { "DIG" }
             },
             {
                 "HAVU",

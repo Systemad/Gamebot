@@ -2,7 +2,6 @@
 using Gamebot.Helper;
 using Gamebot.Persistence;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using TwitchLib.Api;
 using TwitchLib.Api.Helix.Models.Users.GetUsers;
@@ -17,7 +16,8 @@ public partial class Index
     private bool _channelJoined;
 
     [Parameter]
-    public string authtext { get; set; }
+    [SupplyParameterFromQuery(Name = "code")]
+    public string? Code { get; set; }
 
     [Inject]
     private TwitchAPI _twitchApi { get; set; }
@@ -41,26 +41,25 @@ public partial class Index
 
         config.GetSection(TwitchOptions.Twitch).Bind(_options);
 
-        if (!string.IsNullOrEmpty(authtext))
+        if (!string.IsNullOrEmpty(Code))
         {
-            var queryString = authtext;
-            var queryDictionary = QueryHelpers.ParseQuery(queryString);
-            if (queryDictionary.TryGetValue("code", out var authCode))
-            {
-                var authTokenResponse = await _twitchApi.Auth.GetAccessTokenFromCodeAsync(
-                    authCode,
-                    _options.ClientSecret,
-                    _options.RedirectUri
-                );
+            var authCoe = Code;
+            _navigationManager.NavigateTo("/");
+            var authTokenResponse = await _twitchApi.Auth.GetAccessTokenFromCodeAsync(
+                authCoe,
+                _options.ClientSecret,
+                _options.RedirectUri
+            );
 
-                var user = await _twitchApi.Helix.Users.GetUsersAsync(
-                    accessToken: authTokenResponse.AccessToken
-                );
-                currentChannel = user.Users.First();
-            }
+            var user = await _twitchApi.Helix.Users.GetUsersAsync(
+                accessToken: authTokenResponse.AccessToken
+            );
+            currentChannel = user.Users.First();
         }
+
         // TODO: Remove things from URL without reloading page?
-        await CheckIfChannelIsJoined();
+        CheckIfChannelIsJoined();
+        await base.OnInitializedAsync();
     }
 
     private void BeginAuthorization()
@@ -74,13 +73,13 @@ public partial class Index
     }
 
     // TODO: async??
-    private Task CheckIfChannelIsJoined()
+    private void CheckIfChannelIsJoined()
     {
         if (currentChannel is null)
-            return Task.CompletedTask;
+            return;
         using var dbcontext = contextFactory.CreateDbContext();
         _channelJoined = dbcontext.Channels.Any(c => c.Id == currentChannel.Id);
-        return Task.CompletedTask;
+        //StateHasChanged();
     }
 
     private async Task JoinChannelAsync()
@@ -95,12 +94,13 @@ public partial class Index
             };
 
             _twitchClient.JoinChannel(channel.Name);
-            await using var dbcontext = contextFactory.CreateDbContext();
+            using var dbcontext = contextFactory.CreateDbContext();
             dbcontext.Channels.Add(channel);
 
             try
             {
                 await dbcontext.SaveChangesAsync();
+                StateHasChanged();
             }
             catch (UniqueConstraintException e)
             {
@@ -117,13 +117,14 @@ public partial class Index
             var channel = new TwitchChannel
             {
                 Id = currentChannel.Id,
-                //Name = _currentUser.Login,
+                //Name = currentChannel.Login,
                 //Added = DateTimeOffset.Now
             };
-            _twitchClient.LeaveChannel(channel.Name);
-            await using var dbcontext = contextFactory.CreateDbContext();
+            _twitchClient.LeaveChannel(currentChannel.Login);
+            using var dbcontext = contextFactory.CreateDbContext();
             dbcontext.Channels.Remove(channel);
             await dbcontext.SaveChangesAsync();
+            StateHasChanged();
         }
     }
 }

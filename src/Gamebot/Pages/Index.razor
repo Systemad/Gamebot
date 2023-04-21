@@ -1,5 +1,4 @@
 ﻿@page "/"
-@page "/redirect/{authtext}"
 <PageTitle>csgo match bot</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
@@ -33,13 +32,13 @@
             {
                 @if (_channelJoined)
                 {
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="JoinChannelAsync">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="LeaveChannelAsync">
                         Remove bot from channel
                     </MudButton>
                 }
                 else
                 {
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="LeaveChannelAsync">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="JoinChannelAsync">
                        Add bot to channel
                     </MudButton>
                 }
